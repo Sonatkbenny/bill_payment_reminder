@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #4a90e2;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+        }
+        .content {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 0 0 5px 5px;
+        }
+        .section {
+            background-color: white;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .section-title {
+            color: #4a90e2;
+            border-bottom: 2px solid #4a90e2;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .bill-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 10px;
+        }
+        .bill-item:last-child {
+            border-bottom: none;
+        }
+        .bill-title {
+            font-weight: bold;
+            color: #333;
+        }
+        .bill-amount {
+            color: #4a90e2;
+            font-weight: bold;
+        }
+        .bill-due-date {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .bill-category {
+            display: inline-block;
+            padding: 3px 8px;
+            background-color: #e9ecef;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-right: 5px;
+        }
+        .urgent {
+            background-color: #e74c3c;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+        .due-soon {
+            background-color: #f39c12;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #666;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4a90e2;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .summary-stats {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .stat-item {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            flex: 1;
+            min-width: 120px;
+            margin: 5px;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4a90e2;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{{ site_name }}</h1>
+    </div>
+    
+    <div class="content">
+        <h2>Weekly Bill Summary</h2>
+        
+        <p>Dear {{ user.get_full_name|default:user.username }},</p>
+        
+        <p>Here's your weekly summary of bills. Please review the following information:</p>
+        
+        <div class="summary-stats">
+            <div class="stat-item">
+                <div class="stat-value">{{ overdue_bills.count }}</div>
+                <div class="stat-label">Overdue Bills</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">{{ due_this_week.count }}</div>
+                <div class="stat-label">Due This Week</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">${{ total_amount }}</div>
+                <div class="stat-label">Total Due</div>
+            </div>
+        </div>
+        
+        {% if overdue_bills %}
+            <div class="section">
+                <h3 class="section-title">Overdue Bills</h3>
+                <div class="urgent">
+                    <strong>URGENT:</strong> You have {{ overdue_bills.count }} overdue bill{{ overdue_bills.count|pluralize }} that require immediate attention!
+                </div>
+                
+                {% for bill in overdue_bills %}
+                    <div class="bill-item">
+                        <span class="bill-category">{{ bill.get_category_display }}</span>
+                        <div class="bill-title">{{ bill.title }}</div>
+                        <div>Amount: <span class="bill-amount">${{ bill.amount }}</span></div>
+                        <div>Due Date: <span class="bill-due-date">{{ bill.due_date }}</span> ({{ bill.due_date|timesince }} overdue)</div>
+                        {% if bill.description %}
+                            <div>Description: {{ bill.description }}</div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        {% if due_this_week %}
+            <div class="section">
+                <h3 class="section-title">Bills Due This Week</h3>
+                <div class="due-soon">
+                    <strong>Due Soon:</strong> You have {{ due_this_week.count }} bill{{ due_this_week.count|pluralize }} due in the next 7 days.
+                </div>
+                
+                {% for bill in due_this_week %}
+                    <div class="bill-item">
+                        <span class="bill-category">{{ bill.get_category_display }}</span>
+                        <div class="bill-title">{{ bill.title }}</div>
+                        <div>Amount: <span class="bill-amount">${{ bill.amount }}</span></div>
+                        <div>Due Date: <span class="bill-due-date">{{ bill.due_date }}</span> (in {{ bill.due_date|timeuntil }})</div>
+                        {% if bill.description %}
+                            <div>Description: {{ bill.description }}</div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        <p>Please ensure timely payment to avoid any late fees or service interruptions.</p>
+        
+        <a href="{{ site_url }}{% url 'bill_list' %}" class="button">View All Bills</a>
+        
+        <p>Best regards,<br>{{ site_name }} Team</p>
+    </div>
+    
+    <div class="footer">
+        <p>This is an automated message. Please do not reply to this email.</p>
+        <p>If you have any questions, please contact our support team.</p>
+        <p>You can manage your notification preferences in your account settings.</p>
+    </div>
+</body>
+</html> 

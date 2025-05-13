@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Confirmation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .content {
+            background: white;
+            padding: 30px;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .bill-details {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .bill-details p {
+            margin: 10px 0;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #6c757d;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Payment Confirmation</h1>
+        </div>
+        <div class="content">
+            <p>Hello {{ user.get_full_name|default:user.username }},</p>
+            
+            <div class="success-message">
+                <h2>✅ Payment Received</h2>
+                <p>Thank you for your payment!</p>
+            </div>
+
+            <div class="bill-details">
+                <h3>Payment Details:</h3>
+                <p><strong>Bill Title:</strong> {{ bill.title }}</p>
+                <p><strong>Amount Paid:</strong> ${{ bill.amount }}</p>
+                <p><strong>Payment Date:</strong> {{ payment_date|date:"F d, Y" }}</p>
+                <p><strong>Category:</strong> {{ bill.get_category_display }}</p>
+                {% if bill.description %}
+                <p><strong>Description:</strong> {{ bill.description }}</p>
+                {% endif %}
+            </div>
+
+            <p>Your payment has been successfully recorded in our system.</p>
+            
+            <a href="{{ site_url }}/bills/{{ bill.id }}/" class="button">View Bill Details</a>
+        </div>
+        <div class="footer">
+            <p>This is an automated message, please do not reply to this email.</p>
+            <p>&copy; {{ site_name }} {% now "Y" %}</p>
+        </div>
+    </div>
+</body>
+</html> 

@@ -1,0 +1,105 @@
+{% extends 'app/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Pay Bill</h4>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <h5>Bill Details</h5>
+                        <p class="mb-1"><strong>Title:</strong> {{ bill.title }}</p>
+                        <p class="mb-1"><strong>Amount:</strong> ₹{{ bill.amount }}</p>
+                        <p class="mb-1"><strong>Due Date:</strong> {{ bill.due_date }}</p>
+                    </div>
+
+                    {% if test_mode %}
+                    <div class="alert alert-info mb-4">
+                        <h6 class="mb-2"><i class="fas fa-info-circle"></i> Test Mode Active</h6>
+                        <p class="mb-2">Use these test card details:</p>
+                        <ul class="mb-0">
+                            <li>Card Number: 4111 1111 1111 1111</li>
+                            <li>Expiry: Any future date</li>
+                            <li>CVV: Any 3 digits</li>
+                            <li>3D Secure Password: 1221</li>
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    <div class="text-center">
+                        <button id="rzp-button" class="btn btn-primary btn-lg">
+                            <i class="fas fa-credit-card me-2"></i>Pay with Razorpay
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Razorpay Integration -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var options = {
+        "key": "{{ razorpay_merchant_key }}",
+        "amount": "{{ razorpay_amount }}",
+        "currency": "{{ razorpay_currency }}",
+        "name": "Bill Payment System",
+        "description": "{{ bill.title }}",
+        "order_id": "{{ razorpay_order_id }}",
+        "handler": function (response) {
+            // Show loading state
+            document.getElementById('rzp-button').disabled = true;
+            document.getElementById('rzp-button').innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+            
+            // Create and submit form
+            var form = document.createElement('form');
+            form.method = 'POST';
+            form.action = "{{ callback_url }}";
+
+            // Add CSRF token
+            var csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = 'csrfmiddlewaretoken';
+            csrfInput.value = '{{ csrf_token }}';
+            form.appendChild(csrfInput);
+
+            // Add Razorpay response fields
+            for (var key in response) {
+                var input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = key;
+                input.value = response[key];
+                form.appendChild(input);
+            }
+
+            document.body.appendChild(form);
+            form.submit();
+        },
+        "prefill": {
+            "email": "{{ razorpay_email }}",
+            "contact": "{{ razorpay_contact }}"
+        },
+        "theme": {
+            "color": "#007bff"
+        },
+        "modal": {
+            "ondismiss": function() {
+                document.getElementById('rzp-button').disabled = false;
+            }
+        }
+    };
+
+    var rzp = new Razorpay(options);
+    document.getElementById('rzp-button').onclick = function(e) {
+        rzp.open();
+        e.preventDefault();
+    }
+});
+</script>
+{% endblock %}

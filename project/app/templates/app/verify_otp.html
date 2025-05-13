@@ -1,0 +1,82 @@
+{% extends 'app/base.html' %}
+
+{% block title %}Verify OTP - Bill Payment Reminder{% endblock %}
+
+{% block extra_css %}
+<style>
+    .verify-otp-container {
+        max-width: 400px;
+        margin: 100px auto;
+        padding: 20px;
+    }
+    .verify-otp-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        padding: 30px;
+    }
+    .verify-otp-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    .verify-otp-header i {
+        font-size: 3rem;
+        color: #0d6efd;
+        margin-bottom: 15px;
+    }
+    .form-control {
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 15px;
+    }
+    .btn-verify {
+        width: 100%;
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: 500;
+        margin-top: 10px;
+    }
+    .otp-instructions {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-top: 15px;
+        text-align: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="verify-otp-container">
+    <div class="verify-otp-card">
+        <div class="verify-otp-header">
+            <i class="bi bi-shield-lock"></i>
+            <h2>Verify OTP</h2>
+            <p class="text-muted">Please enter the OTP sent to your email</p>
+        </div>
+        
+        {% if messages %}
+        <div class="alert alert-danger">
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="otp" class="form-label">OTP</label>
+                <input type="text" name="otp" id="otp" class="form-control" placeholder="Enter the OTP sent to your email" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-verify">
+                <i class="bi bi-check-circle"></i> Verify OTP
+            </button>
+        </form>
+        
+        <div class="otp-instructions">
+            <p>Didn't receive the OTP? <a href="{% url 'password_reset' %}">Request a new one</a></p>
+            <p class="mt-2">The OTP will expire in 10 minutes.</p>
+        </div>
+    </div>
+</div>
+{% endblock %} 

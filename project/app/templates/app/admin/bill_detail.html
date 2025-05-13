@@ -1,0 +1,195 @@
+{% extends 'app/admin/base.html' %}
+
+{% block title %}Bill Details - Admin Panel{% endblock %}
+
+{% block header_title %}Bill Details{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'admin_bill_list' %}" class="btn btn-outline-primary">
+    <i class="fas fa-arrow-left"></i> Back to Bills
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Bill Information -->
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Bill Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <h4>{{ bill.title }}</h4>
+                    <span class="badge {% if bill.payment_status == 'paid' %}bg-success{% elif bill.payment_status == 'overdue' %}bg-danger{% else %}bg-warning{% endif %} mb-3">
+                        {{ bill.get_payment_status_display }}
+                    </span>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <small class="text-muted d-block mb-1">Amount</small>
+                        <p class="mb-0 fw-bold">₹{{ bill.amount }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted d-block mb-1">Category</small>
+                        <p class="mb-0">{{ bill.get_category_display }}</p>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <small class="text-muted d-block mb-1">Due Date</small>
+                        <p class="mb-0">{{ bill.due_date|date:"F d, Y" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted d-block mb-1">Created At</small>
+                        <p class="mb-0">{{ bill.created_at|date:"F d, Y" }}</p>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <small class="text-muted d-block mb-1">User</small>
+                        <p class="mb-0">
+                            <a href="{% url 'admin_user_detail' bill.user.id %}">
+                                {{ bill.user.username }} ({{ bill.user.get_full_name|default:bill.user.username }})
+                            </a>
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted d-block mb-1">Paid Date</small>
+                        <p class="mb-0">{{ bill.paid_date|date:"F d, Y"|default:"-" }}</p>
+                    </div>
+                </div>
+                
+                {% if bill.description %}
+                <div class="mb-3">
+                    <small class="text-muted d-block mb-1">Description</small>
+                    <p class="mb-0">{{ bill.description }}</p>
+                </div>
+                {% endif %}
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <small class="text-muted d-block mb-1">Last Updated</small>
+                        <p class="mb-0">{{ bill.updated_at|date:"F d, Y" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted d-block mb-1">Reminder Sent</small>
+                        <p class="mb-0">
+                            {% if bill.reminder_sent %}
+                                Yes ({{ bill.last_reminder_sent|date:"F d, Y" }})
+                            {% else %}
+                                No
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Payments -->
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Payment History</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Amount</th>
+                                <th>Method</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if payments %}
+                                {% for payment in payments %}
+                                    <tr>
+                                        <td>₹{{ payment.amount }}</td>
+                                        <td>{{ payment.get_payment_method_display }}</td>
+                                        <td>{{ payment.payment_date|date:"M d, Y" }}</td>
+                                        <td>
+                                            {% if payment.payment_status == 'success' %}
+                                                <span class="badge bg-success">Success</span>
+                                            {% elif payment.payment_status == 'failed' %}
+                                                <span class="badge bg-danger">Failed</span>
+                                            {% else %}
+                                                <span class="badge bg-warning">Pending</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'admin_payment_detail' payment.id %}" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-4">
+                                        <p class="mb-0 text-muted">No payments found for this bill</p>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activity History -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Activity History</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Activity</th>
+                                <th>Date</th>
+                                <th>Type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if activities %}
+                                {% for activity in activities %}
+                                    <tr>
+                                        <td>{{ activity.message }}</td>
+                                        <td>{{ activity.timestamp|date:"M d, Y H:i" }}</td>
+                                        <td>
+                                            {% if activity.type == 'payment' %}
+                                                <span class="badge bg-success">Payment</span>
+                                            {% elif activity.type == 'reminder' %}
+                                                <span class="badge bg-info">Reminder</span>
+                                            {% elif activity.type == 'update' %}
+                                                <span class="badge bg-primary">Update</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Other</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="3" class="text-center py-4">
+                                        <p class="mb-0 text-muted">No activities recorded for this bill</p>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

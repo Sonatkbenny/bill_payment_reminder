@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Panel - Bill Payment Reminder{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --success-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --info-color: #3498db;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+            --border-radius: 4px;
+            --box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            --transition: all 0.3s ease;
+            --sidebar-width: 250px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Admin-specific styles */
+        .admin-wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .admin-sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--dark-color);
+            color: white;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            transition: var(--transition);
+        }
+
+        .admin-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 20px;
+            transition: var(--transition);
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            background-color: var(--secondary-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .sidebar-header h3 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .sidebar-menu {
+            padding: 20px 0;
+        }
+
+        .sidebar-menu .nav-link {
+            color: #ecf0f1 !important;
+            padding: 12px 20px;
+            margin: 5px 0;
+            border-radius: 0;
+            font-weight: 500;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-menu .nav-link:hover,
+        .sidebar-menu .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white !important;
+            padding-left: 25px;
+        }
+
+        .sidebar-menu .nav-link i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .admin-header {
+            background-color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            border-radius: var(--border-radius);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .admin-header h1 {
+            margin: 0;
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        .card {
+            border: none;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid #eee;
+            padding: 15px 20px;
+            font-weight: 600;
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            border-bottom-width: 1px;
+        }
+
+        .badge {
+            font-weight: 500;
+            padding: 6px 10px;
+            border-radius: 20px;
+        }
+
+        .alert {
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+        }
+
+        .pagination {
+            margin-bottom: 0;
+        }
+
+        .page-link {
+            color: var(--primary-color);
+            border-color: #eee;
+            margin: 0 2px;
+            border-radius: var(--border-radius);
+        }
+
+        .page-link:hover {
+            background-color: var(--light-color);
+            color: var(--primary-color);
+        }
+
+        .page-item.active .page-link {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .stats-card {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .stats-icon {
+            width: 60px;
+            height: 60px;
+            background-color: rgba(52, 152, 219, 0.1);
+            color: var(--accent-color);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-right: 15px;
+        }
+
+        .stats-info h3 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .stats-info p {
+            margin: 0;
+            color: #6c757d;
+        }
+
+        /* Responsive sidebar */
+        @media (max-width: 768px) {
+            .admin-sidebar {
+                width: 0;
+                overflow: hidden;
+            }
+            
+            .admin-content {
+                margin-left: 0;
+            }
+            
+            .admin-sidebar.active {
+                width: var(--sidebar-width);
+            }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-header">
+                <h3>Admin Panel</h3>
+                <button class="btn btn-sm btn-link text-white d-md-none" id="sidebarToggle">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="sidebar-menu">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a href="{% url 'admin_dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'admin_user_list' %}" class="nav-link {% if 'admin_user' in request.resolver_match.url_name %}active{% endif %}">
+                            <i class="fas fa-users"></i> Users
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'admin_bill_list' %}" class="nav-link {% if 'admin_bill' in request.resolver_match.url_name %}active{% endif %}">
+                            <i class="fas fa-file-invoice-dollar"></i> Bills
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'admin_payment_list' %}" class="nav-link {% if 'admin_payment' in request.resolver_match.url_name %}active{% endif %}">
+                            <i class="fas fa-credit-card"></i> Payments
+                        </a>
+                    </li>
+                    <li class="nav-item mt-4">
+                        <form method="POST" action="{% url 'logout' %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="nav-link text-danger border-0 bg-transparent w-100 text-start">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-content">
+            <!-- Mobile toggle button -->
+            <button class="btn btn-dark d-md-none mb-3" id="sidebarToggleMobile">
+                <i class="fas fa-bars"></i> Menu
+            </button>
+
+            <!-- Messages -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Page Header -->
+            <div class="admin-header">
+                <h1>{% block header_title %}Admin Dashboard{% endblock %}</h1>
+                <div class="header-actions">
+                    {% block header_actions %}{% endblock %}
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Sidebar toggle for mobile
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebarToggleMobile = document.getElementById('sidebarToggleMobile');
+            const sidebar = document.querySelector('.admin-sidebar');
+            
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function() {
+                    sidebar.classList.remove('active');
+                });
+            }
+            
+            if (sidebarToggleMobile) {
+                sidebarToggleMobile.addEventListener('click', function() {
+                    sidebar.classList.add('active');
+                });
+            }
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html> 

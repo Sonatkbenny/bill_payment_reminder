@@ -1,0 +1,129 @@
+{% extends 'app/admin/base.html' %}
+
+{% block title %}Payment Details - Admin Panel{% endblock %}
+
+{% block header_title %}Payment Details{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'admin_payment_list' %}" class="btn btn-outline-primary">
+    <i class="fas fa-arrow-left"></i> Back to Payments
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Payment Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4 class="mb-0">Payment #{{ payment.id }}</h4>
+                            <span class="badge {% if payment.payment_status == 'success' %}bg-success{% elif payment.payment_status == 'failed' %}bg-danger{% else %}bg-warning{% endif %}">
+                                {{ payment.get_payment_status_display }}
+                            </span>
+                        </div>
+                        <p class="text-muted">
+                            Transaction ID: <span class="fw-bold">{{ payment.transaction_id }}</span>
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <small class="text-muted d-block mb-1">Bill Information</small>
+                        <h5 class="mb-1">{{ payment.bill.title }}</h5>
+                        <p class="mb-0">
+                            <a href="{% url 'admin_bill_detail' payment.bill.id %}" class="text-decoration-none">
+                                View Bill Details <i class="fas fa-arrow-right small"></i>
+                            </a>
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted d-block mb-1">User Information</small>
+                        <h5 class="mb-1">{{ payment.user.get_full_name|default:payment.user.username }}</h5>
+                        <p class="mb-0">
+                            <a href="{% url 'admin_user_detail' payment.user.id %}" class="text-decoration-none">
+                                View User Details <i class="fas fa-arrow-right small"></i>
+                            </a>
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <small class="text-muted d-block mb-1">Amount</small>
+                        <h5 class="mb-0">₹{{ payment.amount }}</h5>
+                    </div>
+                    <div class="col-md-3">
+                        <small class="text-muted d-block mb-1">Payment Method</small>
+                        <h5 class="mb-0">{{ payment.get_payment_method_display }}</h5>
+                    </div>
+                    <div class="col-md-3">
+                        <small class="text-muted d-block mb-1">Payment Date</small>
+                        <h5 class="mb-0">{{ payment.payment_date|date:"F d, Y" }}</h5>
+                    </div>
+                    <div class="col-md-3">
+                        <small class="text-muted d-block mb-1">Payment Time</small>
+                        <h5 class="mb-0">{{ payment.payment_date|date:"H:i:s" }}</h5>
+                    </div>
+                </div>
+                
+                {% if payment.payment_method == 'card' and payment.card_number %}
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <small class="text-muted d-block mb-1">Card Information</small>
+                        <p class="mb-0">Card Number: xxxx-xxxx-xxxx-{{ payment.card_number }}</p>
+                        {% if payment.card_holder %}
+                        <p class="mb-0">Card Holder: {{ payment.card_holder }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if payment.payment_method == 'upi' or payment.payment_method == 'gpay' %}
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <small class="text-muted d-block mb-1">UPI Information</small>
+                        <p class="mb-0">UPI ID: {{ payment.upi_id|default:"Not provided" }}</p>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="row">
+                    <div class="col-md-12">
+                        <small class="text-muted d-block mb-1">Additional Information</small>
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <tbody>
+                                    <tr>
+                                        <th style="width: 200px;">Created At</th>
+                                        <td>{{ payment.created_at|date:"F d, Y H:i:s" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Bill Due Date</th>
+                                        <td>{{ payment.bill.due_date|date:"F d, Y" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Bill Category</th>
+                                        <td>{{ payment.bill.get_category_display }}</td>
+                                    </tr>
+                                    {% if payment.notes %}
+                                    <tr>
+                                        <th>Payment Notes</th>
+                                        <td>{{ payment.notes }}</td>
+                                    </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

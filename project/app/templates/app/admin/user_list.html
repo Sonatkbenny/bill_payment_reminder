@@ -1,0 +1,142 @@
+{% extends 'app/admin/base.html' %}
+
+{% block title %}User Management - Admin Panel{% endblock %}
+
+{% block header_title %}User Management{% endblock %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-header">
+        <form method="get" class="d-flex">
+            <div class="input-group me-2">
+                <input type="text" name="search" class="form-control" placeholder="Search users..." value="{{ search_query }}">
+                <button class="btn btn-primary" type="submit">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+            <a href="{% url 'admin_user_list' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-times"></i> Clear
+            </a>
+        </form>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Name</th>
+                        <th>Joined</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if page_obj %}
+                        {% for user in page_obj %}
+                            <tr>
+                                <td>{{ user.id }}</td>
+                                <td>{{ user.username }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>{{ user.get_full_name|default:"-" }}</td>
+                                <td>{{ user.date_joined|date:"M d, Y" }}</td>
+                                <td>
+                                    {% if user.is_active %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Blocked</span>
+                                    {% endif %}
+                                    
+                                    {% if user.is_staff %}
+                                        <span class="badge bg-primary">Staff</span>
+                                    {% endif %}
+                                    
+                                    {% if user.is_superuser %}
+                                        <span class="badge bg-dark">Admin</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'admin_user_detail' user.id %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    {% if not user.is_superuser %}
+                                        {% if user.is_active %}
+                                            <form method="post" action="{% url 'admin_toggle_user_status' user.id %}" class="d-inline">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action" value="block">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Block User">
+                                                    <i class="fas fa-ban"></i>
+                                                </button>
+                                            </form>
+                                        {% else %}
+                                            <form method="post" action="{% url 'admin_toggle_user_status' user.id %}" class="d-inline">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action" value="unblock">
+                                                <button type="submit" class="btn btn-sm btn-outline-success" title="Unblock User">
+                                                    <i class="fas fa-check-circle"></i>
+                                                </button>
+                                            </form>
+                                        {% endif %}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center py-4">
+                                <p class="mb-0 text-muted">No users found</p>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    {% if page_obj.paginator.num_pages > 1 %}
+    <div class="card-footer d-flex justify-content-center">
+        <nav aria-label="Page navigation">
+            <ul class="pagination mb-0">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}" aria-label="First">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" aria-label="Previous">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    </li>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" aria-label="Next">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}" aria-label="Last">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %} 

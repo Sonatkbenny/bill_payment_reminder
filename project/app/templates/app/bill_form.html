@@ -1,0 +1,280 @@
+{% extends 'app/base.html' %}
+
+{% block title %}{% if form.instance.pk %}Edit Bill{% else %}Create New Bill{% endif %} - Bill Payment Reminder{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-gradient-primary text-white py-4">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-white bg-opacity-20 rounded-circle p-3">
+                                <i class="fas fa-file-invoice-dollar fa-2x"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h4 class="mb-1">{% if form.instance.pk %}Edit Bill{% else %}Create New Bill{% endif %}</h4>
+                            <p class="mb-0 opacity-75">Fill in the details below to {% if form.instance.pk %}update{% else %}create{% endif %} your bill</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Title Field -->
+                        <div class="mb-4">
+                            <label for="{{ form.title.id_for_label }}" class="form-label">Bill Title</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="fas fa-heading text-primary"></i>
+                                </span>
+                                {{ form.title }}
+                            </div>
+                            {% if form.title.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.title.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Category Field -->
+                        <div class="mb-4">
+                            <label for="{{ form.category.id_for_label }}" class="form-label">Category</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="fas fa-tag text-primary"></i>
+                                </span>
+                                {{ form.category }}
+                            </div>
+                            {% if form.category.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.category.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Amount Field -->
+                        <div class="mb-4">
+                            <label for="{{ form.amount.id_for_label }}" class="form-label">Amount</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="fas fa-dollar-sign text-primary"></i>
+                                </span>
+                                {{ form.amount }}
+                            </div>
+                            {% if form.amount.errors %}
+                                <div class="alert alert-danger mt-2">
+                                    {{ form.amount.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <div class="invalid-feedback" id="amountFeedback">
+                                Amount must be a positive number
+                            </div>
+                        </div>
+
+                        <!-- Due Date Field -->
+                        <div class="mb-4">
+                            <label for="{{ form.due_date.id_for_label }}" class="form-label">Due Date</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="fas fa-calendar text-primary"></i>
+                                </span>
+                                {{ form.due_date }}
+                            </div>
+                            {% if form.due_date.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.due_date.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Description Field -->
+                        <div class="mb-4">
+                            <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="fas fa-align-left text-primary"></i>
+                                </span>
+                                {{ form.description }}
+                            </div>
+                            {% if form.description.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.description.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'bill_list' %}" class="btn btn-outline-secondary me-md-2">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>{% if form.instance.pk %}Update Bill{% else %}Create Bill{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-gradient-primary {
+        background: linear-gradient(45deg, #4e73df 10%, #224abe 100%);
+    }
+    .card {
+        border-radius: 15px;
+        overflow: hidden;
+    }
+    .card-header {
+        border-bottom: none;
+    }
+    .form-control {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+    .form-control:focus {
+        border-color: #4e73df;
+        box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    }
+    .input-group-text {
+        border: 1px solid #e0e0e0;
+        border-right: none;
+        border-radius: 8px 0 0 8px;
+    }
+    .input-group .form-control {
+        border-left: none;
+        border-radius: 0 8px 8px 0;
+    }
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    .btn-primary {
+        background: linear-gradient(45deg, #4e73df 10%, #224abe 100%);
+        border: none;
+    }
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(78, 115, 223, 0.3);
+    }
+    .btn-outline-secondary {
+        border: 1px solid #e0e0e0;
+    }
+    .btn-outline-secondary:hover {
+        background-color: #f8f9fa;
+        transform: translateY(-2px);
+    }
+    .form-label {
+        font-weight: 500;
+        color: #4a5568;
+        margin-bottom: 0.5rem;
+    }
+    .invalid-feedback {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+    textarea.form-control {
+        min-height: 120px;
+        resize: vertical;
+    }
+</style>
+
+<script>
+    // Form validation
+    (function () {
+        'use strict'
+        var forms = document.querySelectorAll('.needs-validation')
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
+
+    // Set min date for due_date to today
+    document.addEventListener('DOMContentLoaded', function() {
+        const dueDateInput = document.querySelector('input[name="due_date"]');
+        if (dueDateInput) {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            const formattedDate = `${year}-${month}-${day}`;
+            
+            dueDateInput.setAttribute('min', formattedDate);
+            
+            dueDateInput.addEventListener('input', function() {
+                const selectedDate = new Date(this.value);
+                if (selectedDate < today && selectedDate.toDateString() !== today.toDateString()) {
+                    dueDateInput.setCustomValidity("Due date cannot be before today");
+                } else {
+                    dueDateInput.setCustomValidity("");
+                }
+            });
+        }
+
+        // Validate amount field to prevent negative values
+        const amountInput = document.querySelector('input[name="amount"]');
+        if (amountInput) {
+            // Force numeric input with positive values only
+            amountInput.setAttribute('min', '0.01');
+            amountInput.setAttribute('step', '0.01');
+            
+            // Show error for negative values
+            amountInput.addEventListener('input', function() {
+                validateAmount(this);
+            });
+            
+            amountInput.addEventListener('change', function() {
+                validateAmount(this);
+            });
+            
+            amountInput.addEventListener('blur', function() {
+                validateAmount(this);
+            });
+            
+            // Initial validation
+            validateAmount(amountInput);
+            
+            function validateAmount(inputElement) {
+                const amount = parseFloat(inputElement.value);
+                const amountFeedback = document.getElementById('amountFeedback');
+                
+                if (isNaN(amount)) {
+                    inputElement.setCustomValidity("Amount must be a valid number");
+                    if (amountFeedback) amountFeedback.textContent = "Amount must be a valid number";
+                } else if (amount <= 0) {
+                    inputElement.setCustomValidity("Amount must be a positive number");
+                    if (amountFeedback) amountFeedback.textContent = "Amount must be a positive number";
+                } else {
+                    inputElement.setCustomValidity("");
+                }
+                
+                // For immediate visual feedback
+                if (inputElement.value && (isNaN(amount) || amount <= 0)) {
+                    inputElement.classList.add('is-invalid');
+                    if (amountFeedback) amountFeedback.classList.add('d-block');
+                } else {
+                    inputElement.classList.remove('is-invalid');
+                    if (amountFeedback) amountFeedback.classList.remove('d-block');
+                }
+            }
+        }
+    });
+</script>
+{% endblock %} 

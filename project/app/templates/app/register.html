@@ -1,0 +1,266 @@
+{% extends 'app/base.html' %}
+
+{% block title %}Register - Bill Payment Reminder{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+    }
+    .register-container {
+        max-width: 600px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    .register-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        padding: 40px;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+    }
+    .register-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(135deg, var(--primary-color), #0056b3);
+    }
+    .register-header {
+        text-align: center;
+        margin-bottom: 35px;
+        position: relative;
+    }
+    .register-header::after {
+        content: '';
+        position: absolute;
+        bottom: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 50px;
+        height: 3px;
+        background: linear-gradient(135deg, var(--primary-color), #0056b3);
+        border-radius: 3px;
+    }
+    .register-header i {
+        font-size: 3.5rem;
+        margin-bottom: 20px;
+        background: linear-gradient(135deg, var(--primary-color), #0056b3);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        display: inline-block;
+        padding: 15px;
+        border-radius: 50%;
+        background-color: rgba(13,110,253,0.1);
+    }
+    .register-header h2 {
+        font-weight: 600;
+        color: var(--dark-color);
+        margin-bottom: 10px;
+        font-size: 2rem;
+    }
+    .register-header p {
+        color: var(--secondary-color);
+        font-size: 1.1rem;
+        margin-bottom: 0;
+    }
+    .form-group {
+        margin-bottom: 25px;
+        position: relative;
+    }
+    .form-group label {
+        display: block;
+        font-weight: 500;
+        color: var(--dark-color);
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+    }
+    .form-control {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background-color: #f8f9fa;
+    }
+    .form-control:focus {
+        border-color: var(--primary-color);
+        background-color: white;
+        box-shadow: 0 0 0 0.2rem rgba(13,110,253,0.15);
+    }
+    .form-control.is-invalid {
+        border-color: var(--danger-color);
+        background-color: #fff;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linecap='round' d='M6 3.75v1.5M6 8.25h.01'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right calc(.375em + .1875rem) center;
+        background-size: calc(.75em + .375rem) calc(.75em + .375rem);
+    }
+    .form-control::placeholder {
+        color: #adb5bd;
+    }
+    .invalid-feedback {
+        display: block;
+        font-size: 0.85rem;
+        color: var(--danger-color);
+        margin-top: 5px;
+        padding-left: 5px;
+    }
+    .password-requirements {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 15px;
+        margin-top: 10px;
+        border: 1px solid #e9ecef;
+    }
+    .password-requirements h6 {
+        color: var(--dark-color);
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+        font-weight: 600;
+    }
+    .password-requirements ul {
+        margin: 0;
+        padding-left: 20px;
+    }
+    .password-requirements li {
+        color: var(--secondary-color);
+        font-size: 0.85rem;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+    }
+    .password-requirements li i {
+        color: var(--primary-color);
+        margin-right: 8px;
+        font-size: 0.9rem;
+    }
+    .btn-register {
+        width: 100%;
+        padding: 12px;
+        border-radius: 10px;
+        font-weight: 500;
+        font-size: 1.1rem;
+        margin-top: 20px;
+        background: linear-gradient(135deg, var(--primary-color), #0056b3);
+        border: none;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        color: white;
+    }
+    .btn-register::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: 0.5s;
+    }
+    .btn-register:hover::before {
+        left: 100%;
+    }
+    .btn-register:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(13,110,253,0.3);
+    }
+    .btn-register i {
+        margin-right: 8px;
+    }
+    .register-footer {
+        text-align: center;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #e9ecef;
+    }
+    .register-footer a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.3s ease;
+    }
+    .register-footer a:hover {
+        color: #0056b3;
+        text-decoration: underline;
+    }
+    .alert {
+        border-radius: 10px;
+        border: none;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        padding: 1rem 1.5rem;
+        margin-bottom: 25px;
+    }
+    @media (max-width: 576px) {
+        .register-container {
+            padding: 15px;
+        }
+        .register-card {
+            padding: 30px 20px;
+        }
+        .register-header h2 {
+            font-size: 1.75rem;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="register-container">
+    <div class="register-card">
+        <div class="register-header">
+            <i class="bi bi-person-plus"></i>
+            <h2>Create Account</h2>
+            <p>Join us to manage your bills efficiently</p>
+        </div>
+        
+        <form method="post" novalidate>
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                    </label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="invalid-feedback">
+                            {{ field.errors.0 }}
+                        </div>
+                    {% endif %}
+                    {% if field.name == 'password1' %}
+                        <div class="password-requirements">
+                            <h6>Password Requirements:</h6>
+                            <ul>
+                                <li><i class="bi bi-check-circle"></i> At least 8 characters long</li>
+                                <li><i class="bi bi-check-circle"></i> Must contain at least one number</li>
+                                <li><i class="bi bi-check-circle"></i> Must contain at least one letter</li>
+                                <li><i class="bi bi-check-circle"></i> Must contain at least one special character</li>
+                            </ul>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn-register">
+                <i class="bi bi-person-plus"></i> Create Account
+            </button>
+        </form>
+        
+        <div class="register-footer">
+            <p class="mb-0">Already have an account? <a href="{% url 'login' %}">Login here</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %} 

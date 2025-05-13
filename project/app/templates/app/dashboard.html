@@ -1,0 +1,255 @@
+{% extends 'app/base.html' %}
+
+{% block title %}Dashboard - Bill Payment Reminder{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Welcome Section with Profile Picture -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-gradient-primary text-white shadow-sm">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <div class="position-relative me-4">
+                                <div class="profile-picture-container">
+                                    {% if request.user.profile.profile_picture %}
+                                        <img src="{{ request.user.profile.profile_picture.url }}" 
+                                             alt="Profile Picture" 
+                                             class="rounded-circle profile-picture"
+                                             style="width: 80px; height: 80px; object-fit: cover; border: 3px solid rgba(255,255,255,0.3);">
+                                    {% else %}
+                                        <div class="rounded-circle bg-white bg-opacity-20 d-flex align-items-center justify-content-center profile-picture"
+                                             style="width: 80px; height: 80px;">
+                                            <i class="fas fa-user fa-2x"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div class="profile-edit-overlay">
+                                        <div class="dropdown">
+                                            <button class="btn btn-light btn-sm rounded-circle p-2" type="button" data-bs-toggle="dropdown">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end">
+                                                <li>
+                                                    <a class="dropdown-item" href="{% url 'profile' %}">
+                                                        <i class="fas fa-camera me-2"></i>Change Picture
+                                                    </a>
+                                                </li>
+                                                {% if request.user.profile.profile_picture %}
+                                                    <li>
+                                                        <form method="post" action="{% url 'delete_profile_picture' %}" class="d-inline">
+                                                            {% csrf_token %}
+                                                            <button type="submit" class="dropdown-item text-danger">
+                                                                <i class="fas fa-trash me-2"></i>Remove Picture
+                                                            </button>
+                                                        </form>
+                                                    </li>
+                                                {% endif %}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <h2 class="mb-1">Welcome back, {{ request.user.get_full_name|default:request.user.username }}!</h2>
+                                <p class="mb-0 opacity-75">Here's an overview of your bills and payments</p>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <a href="{% url 'bill_create' %}" class="btn btn-light btn-lg">
+                                <i class="fas fa-plus me-2"></i>Add New Bill
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Upcoming Bills -->
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">Upcoming Bills</h5>
+                </div>
+                <div class="card-body">
+                    {% if upcoming_bills %}
+                        <div class="list-group">
+                            {% for bill in upcoming_bills %}
+                                <a href="{% url 'bill_detail' bill.pk %}" class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">{{ bill.title }}</h6>
+                                        <small>{{ bill.due_date|date:"M d, Y" }}</small>
+                                    </div>
+                                    <p class="mb-1">${{ bill.amount }}</p>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No upcoming bills</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Overdue Bills -->
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="card-title mb-0">Overdue Bills</h5>
+                </div>
+                <div class="card-body">
+                    {% if overdue_bills %}
+                        <div class="list-group">
+                            {% for bill in overdue_bills %}
+                                <a href="{% url 'bill_detail' bill.pk %}" class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">{{ bill.title }}</h6>
+                                        <small>{{ bill.due_date|date:"M d, Y" }}</small>
+                                    </div>
+                                    <p class="mb-1">${{ bill.amount }}</p>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No overdue bills</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recently Paid Bills -->
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">Recently Paid</h5>
+                </div>
+                <div class="card-body">
+                    {% if paid_bills %}
+                        <div class="list-group">
+                            {% for bill in paid_bills %}
+                                <a href="{% url 'bill_detail' bill.pk %}" class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">{{ bill.title }}</h6>
+                                        <small>{{ bill.updated_at|date:"M d, Y" }}</small>
+                                    </div>
+                                    <p class="mb-1">${{ bill.amount }}</p>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No recently paid bills</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'bill_create' %}" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> Add New Bill
+                        </a>
+                        <a href="{% url 'bill_list' %}" class="btn btn-secondary">
+                            <i class="bi bi-list-ul"></i> View All Bills
+                        </a>
+                        <a href="{% url 'calendar' %}" class="btn btn-info">
+                            <i class="bi bi-calendar"></i> Calendar View
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-gradient-primary {
+        background: linear-gradient(45deg, #4e73df 10%, #224abe 100%);
+    }
+    .card {
+        transition: transform 0.2s ease-in-out;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    .table > :not(caption) > * > * {
+        padding: 1rem;
+    }
+    .list-group-item {
+        transition: background-color 0.2s ease-in-out;
+    }
+    .list-group-item:hover {
+        background-color: #f8f9fa;
+    }
+    .btn-group .btn {
+        padding: 0.25rem 0.5rem;
+    }
+    .badge {
+        padding: 0.5em 0.75em;
+    }
+    
+    /* Profile Picture Styles */
+    .profile-picture-container {
+        position: relative;
+        display: inline-block;
+    }
+    .profile-picture {
+        transition: transform 0.2s ease-in-out;
+    }
+    .profile-picture-container:hover .profile-picture {
+        transform: scale(1.05);
+    }
+    .profile-edit-overlay {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        background: white;
+        border-radius: 50%;
+        padding: 2px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        opacity: 0;
+        transform: translate(25%, 25%) scale(0.8);
+        transition: all 0.2s ease-in-out;
+    }
+    .profile-picture-container:hover .profile-edit-overlay {
+        opacity: 1;
+        transform: translate(25%, 25%) scale(1);
+    }
+    .profile-edit-overlay .btn {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .profile-edit-overlay .btn i {
+        font-size: 0.9rem;
+    }
+    .dropdown-menu {
+        min-width: 200px;
+        padding: 0.5rem 0;
+        border: none;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+    .dropdown-item {
+        padding: 0.5rem 1rem;
+        transition: background-color 0.2s ease-in-out;
+    }
+    .dropdown-item:hover {
+        background-color: #f8f9fa;
+    }
+    .dropdown-item.text-danger:hover {
+        background-color: #fee2e2;
+    }
+</style>
+{% endblock %} 

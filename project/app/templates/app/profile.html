@@ -1,0 +1,477 @@
+{% extends 'app/base.html' %}
+
+{% block title %}Profile - Bill Payment Reminder{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-container {
+        max-width: 1000px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+    .profile-header {
+        background: linear-gradient(135deg, var(--primary-color), #0056b3);
+        border-radius: 20px;
+        padding: 40px;
+        color: white;
+        text-align: center;
+        margin-bottom: 30px;
+        position: relative;
+        overflow: hidden;
+    }
+    .profile-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="rgba(255,255,255,0.1)" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+        background-size: cover;
+        opacity: 0.1;
+    }
+    .profile-avatar {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        margin-bottom: 20px;
+        object-fit: cover;
+        border: 4px solid rgba(255,255,255,0.3);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        transition: transform 0.3s ease;
+    }
+    .profile-avatar:hover {
+        transform: scale(1.05);
+    }
+    .profile-name {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+    .profile-email {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 20px;
+    }
+    .profile-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 25px;
+        margin: -50px auto 30px;
+        padding: 0 20px;
+        position: relative;
+        z-index: 1;
+    }
+    .stat-card {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 10px;
+    }
+    .stat-label {
+        color: var(--secondary-color);
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+    .form-section {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .form-section h3 {
+        margin-bottom: 30px;
+        color: var(--primary-color);
+        font-size: 1.8rem;
+        font-weight: 600;
+        position: relative;
+        padding-bottom: 15px;
+    }
+    .form-section h3::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 50px;
+        height: 3px;
+        background: var(--primary-color);
+        border-radius: 3px;
+    }
+    .form-section h4 {
+        color: var(--secondary-color);
+        font-size: 1.2rem;
+        margin-bottom: 20px;
+        font-weight: 500;
+    }
+    .form-group {
+        margin-bottom: 25px;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--secondary-color);
+        font-weight: 500;
+    }
+    .form-control {
+        border-radius: 10px;
+        padding: 12px 15px;
+        border: 1px solid #e0e0e0;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(13,110,253,0.1);
+    }
+    .btn-update {
+        background: var(--primary-color);
+        color: white;
+        padding: 12px 40px;
+        border-radius: 10px;
+        border: none;
+        font-weight: 500;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .btn-update:hover {
+        background: #0056b3;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(13,110,253,0.3);
+    }
+    .btn-update i {
+        font-size: 1.2rem;
+    }
+    .invalid-feedback {
+        color: #dc3545;
+        font-size: 0.9rem;
+        margin-top: 5px;
+    }
+    @media (max-width: 768px) {
+        .profile-container {
+            margin: 20px auto;
+        }
+        .profile-header {
+            padding: 30px 20px;
+        }
+        .profile-name {
+            font-size: 2rem;
+        }
+        .profile-stats {
+            grid-template-columns: 1fr;
+            margin-top: -30px;
+        }
+        .form-section {
+            padding: 25px;
+        }
+    }
+    .profile-picture-container {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 20px;
+    }
+    
+    .profile-picture-wrapper {
+        position: relative;
+        width: 150px;
+        height: 150px;
+        margin: 0 auto;
+    }
+    
+    .profile-avatar {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid rgba(255,255,255,0.3);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        transition: transform 0.3s ease;
+    }
+    
+    .profile-avatar:hover {
+        transform: scale(1.05);
+    }
+    
+    .delete-profile-pic {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        background: rgba(220, 53, 69, 0.9);
+        color: white;
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 2px solid white;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    
+    .delete-profile-pic:hover {
+        background: #dc3545;
+        transform: scale(1.1);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+    
+    .delete-profile-pic i {
+        font-size: 1.1rem;
+    }
+    
+    .delete-confirmation {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        z-index: 1000;
+        max-width: 400px;
+        width: 90%;
+        display: none;
+    }
+    
+    .delete-confirmation.show {
+        display: block;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    .delete-confirmation h4 {
+        color: var(--danger-color);
+        margin-bottom: 20px;
+        font-weight: 600;
+    }
+    
+    .delete-confirmation p {
+        color: var(--secondary-color);
+        margin-bottom: 25px;
+    }
+    
+    .delete-confirmation-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: flex-end;
+    }
+    
+    .btn-cancel {
+        background: var(--light-color);
+        color: var(--secondary-color);
+        border: none;
+        padding: 8px 20px;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-cancel:hover {
+        background: #e9ecef;
+        color: var(--dark-color);
+    }
+    
+    .btn-delete {
+        background: var(--danger-color);
+        color: white;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-delete:hover {
+        background: #c82333;
+        transform: translateY(-2px);
+    }
+    
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+        display: none;
+    }
+    
+    .overlay.show {
+        display: block;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    .test-email-section {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        margin-top: 30px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .test-email-btn {
+        background: #28a745;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 10px;
+        border: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .test-email-btn:hover {
+        background: #218838;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(40,167,69,0.3);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header">
+        <div class="profile-picture-container">
+            <div class="profile-picture-wrapper">
+                {% if user.profile.profile_picture %}
+                    <img src="{{ user.profile.profile_picture.url }}" alt="Profile" class="profile-avatar">
+                    <div class="delete-profile-pic" onclick="showDeleteConfirmation()">
+                        <i class="bi bi-trash"></i>
+                    </div>
+                {% else %}
+                    <i class="bi bi-person-circle" style="font-size: 8rem; color: rgba(255,255,255,0.9);"></i>
+                {% endif %}
+            </div>
+        </div>
+        <h1 class="profile-name">{{ user.get_full_name|default:user.username }}</h1>
+        <p class="profile-email">{{ user.email }}</p>
+    </div>
+
+    <div class="profile-stats">
+        <div class="stat-card">
+            <div class="stat-number">{{ total_bills }}</div>
+            <div class="stat-label">Total Bills</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ pending_bills }}</div>
+            <div class="stat-label">Pending Bills</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ paid_bills }}</div>
+            <div class="stat-label">Paid Bills</div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3>Profile Settings</h3>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-6">
+                    <h4>Personal Information</h4>
+                    {% for field in user_form %}
+                        <div class="form-group">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.errors %}
+                                <div class="invalid-feedback">
+                                    {{ field.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="col-md-6">
+                    <h4>Profile Details</h4>
+                    {% for field in profile_form %}
+                        <div class="form-group">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.errors %}
+                                <div class="invalid-feedback">
+                                    {{ field.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="text-center">
+                <button type="submit" class="btn btn-update">
+                    <i class="bi bi-check-circle"></i> Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="test-email-section">
+        <h3>Email Notification Test</h3>
+        <p>Click the button below to test if email notifications are working properly.</p>
+        <form method="post" action="{% url 'test_email' %}">
+            {% csrf_token %}
+            <button type="submit" class="test-email-btn">
+                <i class="fas fa-envelope"></i> Send Test Email
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="overlay" id="overlay"></div>
+<div class="delete-confirmation" id="deleteConfirmation">
+    <h4>Delete Profile Picture</h4>
+    <p>Are you sure you want to delete your profile picture? This action cannot be undone.</p>
+    <div class="delete-confirmation-buttons">
+        <button class="btn btn-cancel" onclick="hideDeleteConfirmation()">Cancel</button>
+        <form method="post" action="{% url 'delete_profile_picture' %}" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-delete">
+                <i class="bi bi-trash"></i> Delete
+            </button>
+        </form>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    function showDeleteConfirmation() {
+        document.getElementById('overlay').classList.add('show');
+        document.getElementById('deleteConfirmation').classList.add('show');
+    }
+
+    function hideDeleteConfirmation() {
+        document.getElementById('overlay').classList.remove('show');
+        document.getElementById('deleteConfirmation').classList.remove('show');
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('overlay').addEventListener('click', hideDeleteConfirmation);
+</script>
+{% endblock %}
+{% endblock %} 

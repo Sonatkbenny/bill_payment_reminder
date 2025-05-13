@@ -1,0 +1,571 @@
+{% extends 'app/base.html' %}
+
+{% block title %}Home - Bill Payment Reminder{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Welcome Section -->
+    <div class="welcome-section">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1>Welcome to Bill Reminder</h1>
+                <p class="lead">Never miss a payment again. Stay organized and get timely reminders for all your bills.</p>
+            </div>
+            <div class="col-md-4 text-end">
+                {% if not user.is_authenticated %}
+                    <a href="{% url 'register' %}" class="btn btn-light btn-lg me-2">Get Started</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% if user.is_authenticated %}
+        <!-- Quick Stats -->
+        <div class="stats-grid">
+            <div class="stat-card total-bills">
+                <div class="stat-icon">
+                    <i class="bi bi-file-text"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ total_bills }}</h3>
+                    <p>Total Bills</p>
+                </div>
+            </div>
+            <div class="stat-card pending">
+                <div class="stat-icon">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ pending_bills }}</h3>
+                    <p>Due Soon</p>
+                </div>
+            </div>
+            <div class="stat-card overdue">
+                <div class="stat-icon">
+                    <i class="bi bi-exclamation-circle"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ overdue_bills }}</h3>
+                    <p>Overdue</p>
+                </div>
+            </div>
+            <div class="stat-card paid">
+                <div class="stat-icon">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ paid_bills }}</h3>
+                    <p>Paid This Month</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions-section">
+            <h2><i class="bi bi-lightning"></i> Quick Actions</h2>
+            <div class="quick-actions-grid">
+                <a href="{% url 'bill_create' %}" class="action-card">
+                    <div class="action-icon">
+                        <i class="bi bi-plus-circle"></i>
+                    </div>
+                    <h3>Add New Bill</h3>
+                    <p>Create a new bill reminder</p>
+                </a>
+                <a href="{% url 'calendar' %}" class="action-card">
+                    <div class="action-icon">
+                        <i class="bi bi-calendar3"></i>
+                    </div>
+                    <h3>Calendar View</h3>
+                    <p>View bills in calendar</p>
+                </a>
+                <a href="{% url 'bill_list' %}" class="action-card">
+                    <div class="action-icon">
+                        <i class="bi bi-list-check"></i>
+                    </div>
+                    <h3>All Bills</h3>
+                    <p>Manage your bills</p>
+                </a>
+                <a href="{% url 'reminder_settings' %}" class="action-card">
+                    <div class="action-icon">
+                        <i class="bi bi-bell"></i>
+                    </div>
+                    <h3>Reminders</h3>
+                    <p>Configure notifications</p>
+                </a>
+            </div>
+        </div>
+
+        <!-- Upcoming Bills -->
+        <div class="upcoming-bills-section">
+            <div class="section-header">
+                <h2><i class="bi bi-calendar-event"></i> Upcoming Bills</h2>
+                <a href="{% url 'bill_list' %}" class="btn btn-outline-primary">View All</a>
+            </div>
+            {% if upcoming_bills %}
+                <div class="bills-grid">
+                    {% for bill in upcoming_bills %}
+                        <div class="bill-card {% if bill.is_overdue %}overdue{% elif bill.is_due_soon %}due-soon{% endif %}">
+                            <div class="bill-header">
+                                <h3>{{ bill.name }}</h3>
+                                <span class="amount">${{ bill.amount }}</span>
+                            </div>
+                            <div class="bill-info">
+                                <div class="due-date">
+                                    <i class="bi bi-calendar"></i>
+                                    <span>Due: {{ bill.due_date|date:"M d, Y" }}</span>
+                                </div>
+                                <div class="reminder-info">
+                                    <i class="bi bi-bell"></i>
+                                    <span>Reminder: {{ bill.reminder_days }} days before</span>
+                                </div>
+                                <div class="category">
+                                    <i class="bi bi-tag"></i>
+                                    <span>{{ bill.category }}</span>
+                                </div>
+                            </div>
+                            <div class="bill-actions">
+                                <a href="{% url 'bill_update' bill.id %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </a>
+                                <button class="btn btn-sm btn-success mark-paid-btn" data-bill-id="{{ bill.id }}">
+                                    <i class="bi bi-check-circle"></i> Mark Paid
+                                </button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <i class="bi bi-calendar-plus"></i>
+                    <h3>No Upcoming Bills</h3>
+                    <p>Add your first bill to start getting reminders</p>
+                    <a href="{% url 'bill_create' %}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Add New Bill
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="recent-activity-section">
+            <h2><i class="bi bi-activity"></i> Recent Activity</h2>
+            {% if recent_activities %}
+                <div class="activity-timeline">
+                    {% for activity in recent_activities %}
+                        <div class="activity-item">
+                            <div class="activity-icon">
+                                {% if activity.type == 'payment' %}
+                                    <i class="bi bi-credit-card"></i>
+                                {% elif activity.type == 'reminder' %}
+                                    <i class="bi bi-bell"></i>
+                                {% else %}
+                                    <i class="bi bi-pencil"></i>
+                                {% endif %}
+                            </div>
+                            <div class="activity-content">
+                                <p>{{ activity.message }}</p>
+                                <small>{{ activity.timestamp|timesince }} ago</small>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted">No recent activity</p>
+            {% endif %}
+        </div>
+    {% else %}
+        <!-- Features Section for Non-authenticated Users -->
+        <div class="features-section">
+            <h2 class="text-center mb-4">Why Choose Bill Reminder?</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-bell"></i>
+                        </div>
+                        <h3>Smart Reminders</h3>
+                        <p>Get timely notifications through email and push notifications. Never miss a payment deadline.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-calendar-check"></i>
+                        </div>
+                        <h3>Bill Calendar</h3>
+                        <p>View all your bills in a calendar format. Plan your payments effectively.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-graph-up"></i>
+                        </div>
+                        <h3>Payment Analytics</h3>
+                        <p>Track your payment history and analyze spending patterns with detailed insights.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Call to Action -->
+        <div class="cta-section text-center">
+            <h2>Ready to Stay on Top of Your Bills?</h2>
+            <p class="lead">Join thousands of users who never miss a payment deadline.</p>
+            <a href="{% url 'register' %}" class="btn btn-primary btn-lg">
+                <i class="bi bi-person-plus"></i> Sign Up Now - It's Free!
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+    .dashboard-container {
+        padding: 2rem 0;
+    }
+    
+    .welcome-section {
+        background: linear-gradient(135deg, var(--primary-color), #0056b3);
+        color: white;
+        padding: 2rem;
+        border-radius: var(--border-radius);
+        margin-bottom: 2rem;
+        box-shadow: var(--box-shadow);
+    }
+
+    .welcome-section h1 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: var(--transition);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+    }
+
+    .total-bills .stat-icon {
+        background: linear-gradient(135deg, #4CAF50, #45a049);
+    }
+
+    .pending .stat-icon {
+        background: linear-gradient(135deg, #FF9800, #F57C00);
+    }
+
+    .overdue .stat-icon {
+        background: linear-gradient(135deg, #f44336, #d32f2f);
+    }
+
+    .paid .stat-icon {
+        background: linear-gradient(135deg, #2196F3, #1976D2);
+    }
+
+    .stat-info h3 {
+        font-size: 1.8rem;
+        margin: 0;
+        font-weight: 700;
+    }
+
+    .stat-info p {
+        margin: 0;
+        color: var(--secondary-color);
+    }
+
+    .quick-actions-section {
+        margin-bottom: 2rem;
+    }
+
+    .quick-actions-section h2 {
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .quick-actions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .action-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: var(--border-radius);
+        text-align: center;
+        text-decoration: none;
+        color: var(--dark-color);
+        transition: var(--transition);
+        box-shadow: var(--box-shadow);
+    }
+
+    .action-card:hover {
+        transform: translateY(-5px);
+        color: var(--primary-color);
+    }
+
+    .action-icon {
+        font-size: 2rem;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+    }
+
+    .action-card h3 {
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .action-card p {
+        color: var(--secondary-color);
+        margin: 0;
+        font-size: 0.9rem;
+    }
+
+    .upcoming-bills-section {
+        background: white;
+        padding: 1.5rem;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        margin-bottom: 2rem;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .bills-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1rem;
+    }
+
+    .bill-card {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: var(--border-radius);
+        border: 1px solid #e9ecef;
+        transition: var(--transition);
+    }
+
+    .bill-card:hover {
+        transform: translateX(5px);
+        box-shadow: var(--box-shadow);
+    }
+
+    .bill-card.overdue {
+        border-left: 4px solid var(--danger-color);
+    }
+
+    .bill-card.due-soon {
+        border-left: 4px solid var(--warning-color);
+    }
+
+    .bill-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .bill-header h3 {
+        margin: 0;
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+
+    .amount {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+
+    .bill-info {
+        display: grid;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+        color: var(--secondary-color);
+    }
+
+    .bill-info > div {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .bill-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .recent-activity-section {
+        background: white;
+        padding: 1.5rem;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+    }
+
+    .activity-timeline {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .activity-item {
+        display: flex;
+        gap: 1rem;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: var(--border-radius);
+        transition: var(--transition);
+    }
+
+    .activity-item:hover {
+        background: #e9ecef;
+    }
+
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--primary-color);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .activity-content p {
+        margin: 0;
+    }
+
+    .activity-content small {
+        color: var(--secondary-color);
+    }
+
+    .features-section {
+        padding: 3rem 0;
+    }
+
+    .feature-card {
+        text-align: center;
+        padding: 2rem;
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        transition: var(--transition);
+    }
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .feature-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-color), #0056b3);
+        color: white;
+        font-size: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+    }
+
+    .cta-section {
+        background: linear-gradient(135deg, var(--primary-color), #0056b3);
+        color: white;
+        padding: 3rem;
+        border-radius: var(--border-radius);
+        margin-top: 3rem;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+    }
+
+    @media (max-width: 768px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .quick-actions-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .bills-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .welcome-section {
+            text-align: center;
+        }
+        
+        .welcome-section .text-end {
+            text-align: center !important;
+            margin-top: 1rem;
+        }
+    }
+</style>
+
+{% block extra_js %}
+<script>
+    // Mark bill as paid functionality
+    document.querySelectorAll('.mark-paid-btn').forEach(button => {
+        button.addEventListener('click', async (e) => {
+            const billId = e.target.dataset.billId;
+            try {
+                const response = await fetch(`/bills/${billId}/mark-paid/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                });
+                if (response.ok) {
+                    window.location.reload();
+                }
+            } catch (error) {
+                console.error('Error marking bill as paid:', error);
+            }
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %} 
