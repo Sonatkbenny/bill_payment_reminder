@@ -124,9 +124,11 @@
                                 </div>
                             </div>
                             <div class="bill-actions">
-                                <a href="{% url 'bill_update' bill.id %}" class="btn btn-sm btn-outline-primary">
-                                    <i class="bi bi-pencil"></i> Edit
-                                </a>
+                                {% if bill.payment_status != 'paid' %}
+                                    <a href="{% url 'bill_update' bill.id %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-pencil"></i> Edit
+                                    </a>
+                                {% endif %}
                                 <button class="btn btn-sm btn-success mark-paid-btn" data-bill-id="{{ bill.id }}">
                                     <i class="bi bi-check-circle"></i> Mark Paid
                                 </button>

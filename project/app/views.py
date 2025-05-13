@@ -743,28 +743,25 @@ def process_payment(request, bill_id):
         # Send payment confirmation email synchronously
         try:
             # Prepare email context
-        context = {
+            context = {
                 'user': bill.user,
-            'bill': bill,
+                'bill': bill,
                 'payment': payment,
-            'site_name': 'Bill Payment System',
+                'site_name': 'Bill Payment System',
                 'site_url': settings.SITE_URL if hasattr(settings, 'SITE_URL') else request.build_absolute_uri('/'),
-        }
-        
+            }
             # Render HTML email template
             html_content = render_to_string('app/email/payment_success.html', context)
-        plain_text = strip_tags(html_content)
-        
+            plain_text = strip_tags(html_content)
             # Send email
-        send_mail(
+            send_mail(
                 subject=f'Payment Successful - {bill.title}',
-            message=plain_text,
-            from_email=settings.DEFAULT_FROM_EMAIL,
+                message=plain_text,
+                from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[bill.user.email],
-            html_message=html_content,
+                html_message=html_content,
                 fail_silently=True,
             )
-            
             # Log email sent
             BillActivity.objects.create(
                 bill=bill,

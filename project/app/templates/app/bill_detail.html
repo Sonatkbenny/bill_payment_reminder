@@ -121,9 +121,11 @@
                                 <i class="fas fa-credit-card me-2"></i>Pay Now
                             </a>
                         {% endif %}
-                        <a href="{% url 'bill_update' bill.id %}" class="btn btn-outline-primary">
-                            <i class="fas fa-edit me-2"></i>Edit
-                        </a>
+                        {% if bill.payment_status != 'paid' %}
+                            <a href="{% url 'bill_update' bill.id %}" class="btn btn-outline-primary">
+                                <i class="fas fa-edit me-2"></i>Edit
+                            </a>
+                        {% endif %}
                     </div>
                 </div>
                 <div class="card-body">
@@ -238,9 +240,11 @@
                                 <i class="fas fa-bell me-2"></i>Send Reminder
                             </a>
                         {% endif %}
-                        <a href="{% url 'bill_update' bill.id %}" class="btn btn-outline-secondary">
-                            <i class="fas fa-edit me-2"></i>Edit Bill
-                        </a>
+                        {% if bill.payment_status != 'paid' %}
+                            <a href="{% url 'bill_update' bill.id %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-edit me-2"></i>Edit Bill
+                            </a>
+                        {% endif %}
                         <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
                             <i class="fas fa-trash-alt me-2"></i>Delete Bill
                         </button>
